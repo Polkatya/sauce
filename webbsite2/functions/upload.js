@@ -1,4 +1,4 @@
-export async function onRequestPost(context) {
+﻿export async function onRequestPost(context) {
   try {
     const incomingForm = await context.request.formData();
     const file = incomingForm.get('file');
@@ -8,18 +8,18 @@ export async function onRequestPost(context) {
     }
 
     const fd = new FormData();
-    fd.append('reqtype', 'fileupload');
-    fd.append('fileToUpload', file, file.name);
+    fd.append('file', file, file.name);
 
-    const res = await fetch('https://catbox.moe/user/api.php', {
+    const res = await fetch('https://0x0.st', {
       method: 'POST',
-      body: fd
+      body: fd,
+      headers: { 'User-Agent': 'Mozilla/5.0 (Cloudflare Pages Function)' }
     });
 
     const text = (await res.text()).trim();
 
     if (!res.ok || !text.startsWith('http')) {
-      return new Response(JSON.stringify({ error: 'upload failed: ' + text }), { status: 502 });
+      return new Response(JSON.stringify({ error: 'upload failed: ' + res.status + ' ' + text }), { status: 502 });
     }
 
     return new Response(JSON.stringify({ url: text }), {
