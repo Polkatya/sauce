@@ -1,0 +1,218 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Генератор ссылок</title><style>
+*{box-sizing:border-box}
+body{margin:0;background:#0f0f0f;color:#eee;font-family:Arial,sans-serif;padding:24px 16px}
+.box{max-width:500px;margin:auto}
+h1{font-size:22px}
+label{display:block;margin:18px 0 6px;color:#aaa;font-size:13px}
+input[type=number]{width:100%;padding:14px;border:1px solid #333;border-radius:9px;background:#181818;color:#fff;font-size:16px}
+input[type=text]{width:100%;padding:14px;border:1px solid #333;border-radius:9px;background:#181818;color:#fff;font-size:16px}
+.filebox{border:2px dashed #333;border-radius:9px;padding:20px;text-align:center;cursor:pointer;background:#141414}
+.filebox.drag{border-color:#666;background:#1c1c1c}
+.filebox .fname{font-size:13px;color:#6bd08f;margin-top:8px;word-break:break-all}
+.filebox .ftext{color:#888;font-size:13px}
+input[type=file]{display:none}
+button{width:100%;padding:15px;margin-top:12px;border:0;border-radius:9px;font-size:16px;font-weight:600;background:#eee;color:#111;cursor:pointer}
+button:disabled{opacity:.5;cursor:default}
+.out{display:none;margin-top:18px}
+.out.show{display:block}
+.link{word-break:break-all;background:#181818;padding:12px;border-radius:9px;font-size:13px;margin-bottom:10px}
+.hint{font-size:12px;color:#777;margin-top:5px}
+.thumb-mode{display:flex;gap:8px;margin-top:6px}
+.thumb-mode button{margin-top:0;flex:1;background:#181818;color:#aaa;border:1px solid #333;font-weight:500;font-size:13px;padding:10px}
+.thumb-mode button.active{background:#eee;color:#111;border-color:#eee}
+.manual-thumb{display:none;margin-top:10px}
+.manual-thumb.show{display:block}
+.preview{display:none;margin-top:12px;border-radius:9px;overflow:hidden;background:#181818}
+.preview.show{display:block}
+.preview img{width:100%;display:block}
+.status{font-size:13px;color:#999;margin-top:8px;min-height:18px}
+.status.err{color:#ff8b8b}
+.status.ok{color:#6bd08f}
+.progress{height:4px;background:#222;border-radius:2px;overflow:hidden;margin-top:6px;display:none}
+.progress.show{display:block}
+.progress .bar{height:100%;background:#6bd08f;width:0%;transition:width .2s}
+</style></head><body><div class="box">
+<h1>Генератор ссылки</h1>
+
+<label>Видео (MP4)</label>
+<div class="filebox" id="filebox">
+  <div class="ftext">Нажми, чтобы выбрать файл, или перетащи сюда</div>
+  <div class="fname" id="fname"></div>
+</div>
+<input type="file" id="videoFile" accept="video/mp4,video/*">
+<div class="hint">До 200 МБ на файл.</div>
+
+<label>Превью</label>
+<div class="thumb-mode">
+  <button type="button" id="modeCenter" class="active">Кадр из центра</button>
+  <button type="button" id="modeRandom">Случайный кадр</button>
+  <button type="button" id="modeManual">Своя ссылка</button>
+</div>
+<div class="manual-thumb" id="manualBox">
+  <input type="text" id="i" placeholder="https://file.garden/...jpg">
+  <div class="hint">Лучше горизонтальная картинка 1200×630.</div>
+</div>
+<div class="preview" id="previewBox"><img id="previewImg"></div>
+<div class="status" id="thumbStatus"></div>
+
+<label>Название</label><input type="text" id="t" value="Новое видео">
+<label>Таймер</label><input type="number" id="s" min="3" max="30" value="8">
+<button id="go">Создать ссылку</button>
+<div class="progress" id="progressBox"><div class="bar" id="progressBar"></div></div>
+<div class="out" id="out"><div class="link" id="link"></div><button id="copy">Копировать ссылку</button></div>
+</div>
+
+<video id="hiddenVideo" style="display:none" muted playsinline preload="auto"></video>
+<canvas id="hiddenCanvas" style="display:none"></canvas>
+
+<script>
+let thumbMode = 'center'; // center | random | manual
+let extractedThumbUrl = '';
+let selectedFile = null;
+let localVideoUrl = '';
+
+const filebox = document.getElementById('filebox');
+const videoFileInput = document.getElementById('videoFile');
+const fname = document.getElementById('fname');
+const modeCenter = document.getElementById('modeCenter');
+const modeRandom = document.getElementById('modeRandom');
+const modeManual = document.getElementById('modeManual');
+const manualBox = document.getElementById('manualBox');
+const previewBox = document.getElementById('previewBox');
+const previewImg = document.getElementById('previewImg');
+const thumbStatus = document.getElementById('thumbStatus');
+const goBtn = document.getElementById('go');
+const videoEl = document.getElementById('hiddenVideo');
+const canvasEl = document.getElementById('hiddenCanvas');
+const progressBox = document.getElementById('progressBox');
+const progressBar = document.getElementById('progressBar');
+
+filebox.onclick = () => videoFileInput.click();
+filebox.ondragover = (e) => { e.preventDefault(); filebox.classList.add('drag'); };
+filebox.ondragleave = () => filebox.classList.remove('drag');
+filebox.ondrop = (e) => {
+  e.preventDefault(); filebox.classList.remove('drag');
+  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+};
+videoFileInput.onchange = () => { if (videoFileInput.files[0]) handleFile(videoFileInput.files[0]); };
+
+function handleFile(file){
+  selectedFile = file;
+  fname.textContent = file.name + ' (' + (file.size / 1024 / 1024).toFixed(1) + ' МБ)';
+  if (localVideoUrl) URL.revokeObjectURL(localVideoUrl);
+  localVideoUrl = URL.createObjectURL(file);
+  extractedThumbUrl = '';
+  previewBox.classList.remove('show');
+  thumbStatus.textContent = '';
+}
+
+function setMode(mode){
+  thumbMode = mode;
+  [modeCenter, modeRandom, modeManual].forEach(b => b.classList.remove('active'));
+  ({center: modeCenter, random: modeRandom, manual: modeManual}[mode]).classList.add('active');
+  manualBox.classList.toggle('show', mode === 'manual');
+}
+modeCenter.onclick = () => setMode('center');
+modeRandom.onclick = () => setMode('random');
+modeManual.onclick = () => setMode('manual');
+
+function grabFrame(url, when){
+  return new Promise((resolve, reject) => {
+    videoEl.src = url;
+    videoEl.onloadedmetadata = () => {
+      const t = when === 'random'
+        ? Math.random() * Math.max(videoEl.duration - 0.5, 0.1)
+        : videoEl.duration / 2;
+      videoEl.currentTime = t;
+    };
+    videoEl.onseeked = () => {
+      try {
+        canvasEl.width = videoEl.videoWidth;
+        canvasEl.height = videoEl.videoHeight;
+        canvasEl.getContext('2d').drawImage(videoEl, 0, 0);
+        canvasEl.toBlob(blob => blob ? resolve(blob) : reject(new Error('empty blob')), 'image/jpeg', 0.85);
+      } catch (e) { reject(e); }
+    };
+    videoEl.onerror = () => reject(new Error('video load error'));
+  });
+}
+
+function uploadViaProxy(fileOrBlob, filename, onProgress){
+  return new Promise((resolve, reject) => {
+    const fd = new FormData();
+    fd.append('file', fileOrBlob, filename);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/upload');
+    xhr.upload.onprogress = (e) => { if (e.lengthComputable && onProgress) onProgress(e.loaded / e.total); };
+    xhr.onload = () => {
+      try {
+        const data = JSON.parse(xhr.responseText);
+        if (xhr.status >= 200 && xhr.status < 300 && data.url) resolve(data.url);
+        else reject(new Error(data.error || ('upload failed: ' + xhr.status)));
+      } catch (e) {
+        reject(new Error('bad response'));
+      }
+    };
+    xhr.onerror = () => reject(new Error('network error'));
+    xhr.send(fd);
+  });
+}
+
+go.onclick = async () => {
+  if (!selectedFile) { thumbStatus.textContent = 'Сначала выбери видеофайл'; thumbStatus.className = 'status err'; return; }
+  if (thumbMode === 'manual' && !i.value.trim()) { thumbStatus.textContent = 'Вставь ссылку на превью'; thumbStatus.className = 'status err'; return; }
+
+  goBtn.disabled = true;
+  progressBox.classList.add('show');
+  progressBar.style.width = '0%';
+  try {
+    // 1. Get thumbnail (auto-extract or manual)
+    let thumbUrl = thumbMode === 'manual' ? i.value.trim() : '';
+    if (thumbMode !== 'manual') {
+      thumbStatus.textContent = 'Достаю кадр из видео...'; thumbStatus.className = 'status';
+      try {
+        const blob = await Promise.race([
+          grabFrame(localVideoUrl, thumbMode),
+          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 8000))
+        ]);
+        previewImg.src = URL.createObjectURL(blob);
+        previewBox.classList.add('show');
+        thumbStatus.textContent = 'Загружаю превью...';
+        thumbUrl = await uploadViaProxy(blob, 'thumb.jpg');
+        extractedThumbUrl = thumbUrl;
+      } catch (frameErr) {
+        // Часто падает на HEVC-видео с iPhone — Android/Chrome не умеет
+        // декодировать такой кодек через <video>. Не блокируем создание
+        // ссылки, просто ставим запасную картинку.
+        thumbStatus.textContent = 'Не смог достать кадр (формат видео), ставлю заглушку...';
+        thumbUrl = 'https://placehold.co/1200x630/1a1a1a/ffffff?text=Video';
+      }
+    }
+
+    // 2. Upload the video file itself
+    thumbStatus.textContent = 'Загружаю видео... 0%'; thumbStatus.className = 'status';
+    const videoUrl = await uploadViaProxy(selectedFile, selectedFile.name, (p) => {
+      progressBar.style.width = Math.round(p * 100) + '%';
+      thumbStatus.textContent = 'Загружаю видео... ' + Math.round(p * 100) + '%';
+    });
+
+    // 3. Build link
+    const base = location.origin + '/view';
+    const u = new URL(base);
+    u.searchParams.set('v', videoUrl);
+    u.searchParams.set('i', thumbUrl);
+    u.searchParams.set('t', t.value.trim() || 'Видео');
+    u.searchParams.set('s', s.value || '8');
+    link.textContent = u.href;
+    out.classList.add('show');
+    thumbStatus.textContent = 'Готово!'; thumbStatus.className = 'status ok';
+  } catch (e) {
+    thumbStatus.textContent = 'Ошибка загрузки: ' + e.message + '. Попробуй ещё раз.';
+    thumbStatus.className = 'status err';
+  } finally {
+    goBtn.disabled = false;
+    progressBox.classList.remove('show');
+  }
+};
+copy.onclick = async () => { await navigator.clipboard.writeText(link.textContent); copy.textContent = 'Скопировано'; };
+</script></body></html>
