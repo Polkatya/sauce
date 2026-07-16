@@ -1,28 +1,25 @@
-﻿export async function onRequestPost(context) {
+﻿const PUBLIC_R2_URL = 'https://pub-a806ca017d9b4ec1998502d81a9a686c.r2.dev';
+
+export async function onRequestPost(context) {
   try {
-    const incomingForm = await context.request.formData();
+    const { env, request } = context;
+    const incomingForm = await request.formData();
     const file = incomingForm.get('file');
 
     if (!file) {
       return new Response(JSON.stringify({ error: 'no file' }), { status: 400 });
     }
 
-    const fd = new FormData();
-    fd.append('file', file, file.name);
+    const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
+    const key = crypto.randomUUID() + '.' + ext;
 
-    const res = await fetch('https://0x0.st', {
-      method: 'POST',
-      body: fd,
-      headers: { 'User-Agent': 'Mozilla/5.0 (Cloudflare Pages Function)' }
+    await env.VIDEOS.put(key, file.stream(), {
+      httpMetadata: { contentType: file.type || 'application/octet-stream' }
     });
 
-    const text = (await res.text()).trim();
+    const url = PUBLIC_R2_URL + '/' + key;
 
-    if (!res.ok || !text.startsWith('http')) {
-      return new Response(JSON.stringify({ error: 'upload failed: ' + res.status + ' ' + text }), { status: 502 });
-    }
-
-    return new Response(JSON.stringify({ url: text }), {
+    return new Response(JSON.stringify({ url }), {
       status: 200,
       headers: { 'content-type': 'application/json' }
     });
