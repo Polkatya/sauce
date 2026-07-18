@@ -38,7 +38,6 @@ const html=`
 
 <title>${T}</title>
 
-
 <style>
 
 body{
@@ -50,24 +49,20 @@ justify-content:center;
 padding:20px;
 }
 
-
 .wrap{
 display:flex;
 gap:20px;
 align-items:flex-start;
 }
 
-
 .side{
 width:160px;
 height:600px;
 }
 
-
 .card{
 width:480px;
 }
-
 
 .thumb img{
 width:100%;
@@ -75,16 +70,13 @@ border-radius:12px;
 cursor:pointer;
 }
 
-
 .gate{
 display:none;
 }
 
-
 .gate.active{
 display:block;
 }
-
 
 .banner{
 text-align:center;
@@ -92,13 +84,11 @@ margin:10px;
 min-height:20px;
 }
 
-
 #timer{
 font-size:30px;
 text-align:center;
 margin:20px;
 }
-
 
 video{
 width:100%;
@@ -119,7 +109,6 @@ display:none;
 <div class="side" id="left"></div>
 
 
-
 <div class="card">
 
 
@@ -128,7 +117,6 @@ display:none;
 <img src="${I}">
 
 </div>
-
 
 
 <div id="gate" class="gate">
@@ -142,18 +130,6 @@ ${timer}
 </div>
 
 
-
-<button id="playBtn" style="
-display:none;
-width:100%;
-padding:15px;
-font-size:20px;
-cursor:pointer;
-">
-▶ PLAY
-</button>
-
-
 <video id="video" controls src="${V}"></video>
 
 
@@ -161,8 +137,6 @@ cursor:pointer;
 
 
 </div>
-
-
 
 
 <div class="side" id="right"></div>
@@ -181,10 +155,6 @@ const gate=document.getElementById("gate");
 
 const video=document.getElementById("video");
 
-const playBtn=document.getElementById("playBtn");
-
-
-
 
 
 function banner(el,key,w,h){
@@ -192,33 +162,20 @@ function banner(el,key,w,h){
 
 let s1=document.createElement("script");
 
-
-s1.innerHTML=`
-
-atOptions={
-
-'key':'${key}',
-
-'format':'iframe',
-
-'height':${h},
-
-'width':${w},
-
-'params':{}
-
-}
-
-`;
-
+s1.textContent=
+"atOptions={"+
+"'key':'"+key+"',"+
+"'format':'iframe',"+
+"'height':"+h+","+
+"'width':"+w+","+
+"'params':{}"+
+"};";
 
 
 let s2=document.createElement("script");
 
-
 s2.src=
 "https://www.highperformanceformat.com/"+key+"/invoke.js";
-
 
 
 el.appendChild(s1);
@@ -227,7 +184,6 @@ el.appendChild(s2);
 
 
 }
-
 
 
 
@@ -292,7 +248,10 @@ clearInterval(x);
 document.getElementById("timer").style.display="none";
 
 
-playBtn.style.display="block";
+video.style.display="block";
+
+
+video.play();
 
 
 }
@@ -300,22 +259,6 @@ playBtn.style.display="block";
 
 },1000);
 
-
-
-};
-
-
-
-playBtn.onclick=()=>{
-
-
-video.style.display="block";
-
-
-playBtn.style.display="none";
-
-
-video.play();
 
 
 };
@@ -330,7 +273,6 @@ video.play();
 </html>
 
 `;
-
 
 
 return new Response(html,{
