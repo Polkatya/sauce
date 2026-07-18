@@ -1,15 +1,18 @@
 export async function onRequestGet(context) {
 
 const {request}=context;
+
 const url=new URL(request.url);
 const q=url.searchParams;
+
 
 const video=q.get("v") || "";
 const thumb=q.get("i") || "";
 const title=q.get("t") || "Видео";
-const timer=Math.min(30,Math.max(3,Number(q.get("s")||8)));
+const timer=Math.min(30,Math.max(3,Number(q.get("s") || 8)));
 
-const esc=s=>String(s).replace(/[&<>"']/g,c=>({
+
+const esc=(s)=>String(s).replace(/[&<>"']/g,c=>({
 "&":"&amp;",
 "<":"&lt;",
 ">":"&gt;",
@@ -17,20 +20,24 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({
 "'":"&#39;"
 }[c]));
 
+
 const V=esc(video);
 const I=esc(thumb);
 const T=esc(title);
+
 
 
 const html=`
 
 <!doctype html>
 <html>
+
 <head>
 
 <meta charset="utf-8">
 
 <title>${T}</title>
+
 
 <style>
 
@@ -43,19 +50,24 @@ justify-content:center;
 padding:20px;
 }
 
+
 .wrap{
 display:flex;
 gap:20px;
+align-items:flex-start;
 }
+
 
 .side{
 width:160px;
 height:600px;
 }
 
+
 .card{
 width:480px;
 }
+
 
 .thumb img{
 width:100%;
@@ -63,19 +75,30 @@ border-radius:12px;
 cursor:pointer;
 }
 
+
 .gate{
 display:none;
 }
+
 
 .gate.active{
 display:block;
 }
 
+
+.banner{
+text-align:center;
+margin:10px;
+min-height:20px;
+}
+
+
 #timer{
 font-size:30px;
 text-align:center;
-margin:15px;
+margin:20px;
 }
+
 
 video{
 width:100%;
@@ -96,6 +119,7 @@ display:none;
 <div class="side" id="left"></div>
 
 
+
 <div class="card">
 
 
@@ -106,13 +130,28 @@ display:none;
 </div>
 
 
+
 <div id="gate" class="gate">
 
 
-<div id="top"></div>
+<div id="top" class="banner"></div>
 
 
-<div id="timer">${timer}</div>
+<div id="timer">
+${timer}
+</div>
+
+
+
+<button id="playBtn" style="
+display:none;
+width:100%;
+padding:15px;
+font-size:20px;
+cursor:pointer;
+">
+▶ PLAY
+</button>
 
 
 <video id="video" controls src="${V}"></video>
@@ -122,6 +161,8 @@ display:none;
 
 
 </div>
+
+
 
 
 <div class="side" id="right"></div>
@@ -134,38 +175,61 @@ display:none;
 <script>
 
 
-function banner(el,key,width,height){
+const preview=document.getElementById("preview");
 
-let s=document.createElement("script");
+const gate=document.getElementById("gate");
 
-s.innerHTML=`
+const video=document.getElementById("video");
+
+const playBtn=document.getElementById("playBtn");
+
+
+
+
+
+function banner(el,key,w,h){
+
+
+let s1=document.createElement("script");
+
+
+s1.innerHTML=`
 
 atOptions={
+
 'key':'${key}',
+
 'format':'iframe',
-'height':${height},
-'width':${width},
+
+'height':${h},
+
+'width':${w},
+
 'params':{}
+
 }
 
 `;
 
-el.appendChild(s);
 
 
-let js=document.createElement("script");
+let s2=document.createElement("script");
 
-js.src="https://www.highperformanceformat.com/"+key+"/invoke.js";
 
-el.appendChild(js);
+s2.src=
+"https://www.highperformanceformat.com/"+key+"/invoke.js";
+
+
+
+el.appendChild(s1);
+
+el.appendChild(s2);
+
 
 }
 
 
 
-const preview=document.getElementById("preview");
-const gate=document.getElementById("gate");
-const video=document.getElementById("video");
 
 
 preview.onclick=()=>{
@@ -173,7 +237,9 @@ preview.onclick=()=>{
 
 preview.style.display="none";
 
+
 gate.classList.add("active");
+
 
 
 banner(
@@ -184,12 +250,14 @@ document.getElementById("top"),
 );
 
 
+
 banner(
 document.getElementById("left"),
 "757bc3bbc1cd4205a78514cb1b4fa5e4",
 160,
 600
 );
+
 
 
 banner(
@@ -204,20 +272,31 @@ document.getElementById("right"),
 let n=${timer};
 
 
+
 let x=setInterval(()=>{
 
+
 n--;
+
 
 document.getElementById("timer").innerHTML=n;
 
 
+
 if(n<=0){
+
 
 clearInterval(x);
 
-video.style.display="block";
+
+document.getElementById("timer").style.display="none";
+
+
+playBtn.style.display="block";
+
 
 }
+
 
 },1000);
 
@@ -226,20 +305,44 @@ video.style.display="block";
 };
 
 
+
+playBtn.onclick=()=>{
+
+
+video.style.display="block";
+
+
+playBtn.style.display="none";
+
+
+video.play();
+
+
+};
+
+
+
 </script>
 
 
 </body>
+
 </html>
 
 `;
 
 
+
 return new Response(html,{
+
 headers:{
-"content-type":"text/html;charset=utf-8",
+
+"content-type":"text/html;charset=UTF-8",
+
 "cache-control":"no-cache"
+
 }
+
 });
 
 
