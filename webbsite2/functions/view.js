@@ -14,6 +14,10 @@ export async function onRequestGet(context) {
 
   const V = esc(video), I = esc(thumb), T = esc(title);
 
+  const bannerTopRaw = `<script>atOptions={'key':'d23a1fd1e3611a7e483d6319d05ceda4','format':'iframe','height':250,'width':300,'params':{}};<\/script><script src='https://www.highperformanceformat.com/d23a1fd1e3611a7e483d6319d05ceda4/invoke.js'><\/script>`;
+  const bannerBottomRaw = `<script async data-cfasync="false" src="https://pl30381760.effectivecpmnetwork.com/005a0b247c5edb84a57a6b92b4b26f1a/invoke.js"><\/script><div id="container-005a0b247c5edb84a57a6b92b4b26f1a"></div>`;
+  const bannerSideRaw = `<script>atOptions={'key':'757bc3bbc1cd4205a78514cb1b4fa5e4','format':'iframe','height':600,'width':160,'params':{}};<\/script><script src='https://www.highperformanceformat.com/757bc3bbc1cd4205a78514cb1b4fa5e4/invoke.js'><\/script>`;
+
   const html = `<!doctype html>
 <html lang="ru">
 <head>
@@ -31,28 +35,57 @@ export async function onRequestGet(context) {
 <meta name="twitter:image" content="${I}">
 <meta name="theme-color" content="#0f0f0f">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}body{background:#0f0f0f;color:#f2f2f2;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}.card{width:100%;max-width:480px}.thumb{position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#1a1a1a;cursor:pointer}.thumb img{width:100%;height:100%;object-fit:cover;display:block}.play{position:absolute;inset:0;display:grid;place-items:center}.play span{width:64px;height:64px;border-radius:50%;background:#000a;display:grid;place-items:center;font-size:28px;padding-left:4px}.title{margin-top:12px;font-size:15px}.gate{display:none;background:#181818;border-radius:12px;overflow:hidden}.gate.active{display:block}.banner{background:#232323;min-height:60px;display:flex;align-items:center;justify-content:center;padding:10px}.body{padding:28px 20px;text-align:center}.timer{font-size:28px;margin-bottom:18px}.btn{width:100%;padding:13px;border:0;border-radius:8px;background:#2c2c2c;color:#777;font-size:15px}.video{display:none;width:100%;max-height:70vh;background:#000;border-radius:8px}.err{display:none;color:#ff8b8b;font-size:13px;margin-top:10px}
+*{box-sizing:border-box;margin:0;padding:0}body{background:#0f0f0f;color:#f2f2f2;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.wrap{display:flex;align-items:flex-start;justify-content:center;gap:20px}
+.side{display:none;width:160px;height:600px;background:#181818;border-radius:8px;overflow:hidden;flex:0 0 160px}
+.card{width:100%;max-width:480px}.thumb{position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#1a1a1a;cursor:pointer}.thumb img{width:100%;height:100%;object-fit:cover;display:block}.play{position:absolute;inset:0;display:grid;place-items:center}.play span{width:64px;height:64px;border-radius:50%;background:#000a;display:grid;place-items:center;font-size:28px;padding-left:4px}.title{margin-top:12px;font-size:15px}.gate{display:none;background:#181818;border-radius:12px;overflow:hidden}.gate.active{display:block}.banner{background:#232323;min-height:60px;display:flex;align-items:center;justify-content:center;padding:10px}.body{padding:28px 20px;text-align:center}.timer{font-size:28px;margin-bottom:18px}.btn{width:100%;padding:13px;border:0;border-radius:8px;background:#2c2c2c;color:#777;font-size:15px}.video{display:none;width:100%;max-height:70vh;background:#000;border-radius:8px}.err{display:none;color:#ff8b8b;font-size:13px;margin-top:10px}
+@media (min-width:1000px){.side{display:block}}
 </style>
 </head>
-<body><div class="card">
+<body><div class="wrap">
+<div class="side" id="sideLeft"></div>
+<div class="card">
 <div id="preview"><div class="thumb" id="open"><img src="${I}" alt=""><div class="play"><span>▶</span></div></div><div class="title">${T}</div></div>
 <div class="gate" id="gate">
-<div class="banner">
-<script>atOptions={'key':'d23a1fd1e3611a7e483d6319d05ceda4','format':'iframe','height':250,'width':300,'params':{}};<\/script>
-<script src="https://www.highperformanceformat.com/d23a1fd1e3611a7e483d6319d05ceda4/invoke.js"><\/script>
-</div>
+<div class="banner" id="bannerTop"></div>
 <div class="body">
 <div id="wait"><div class="timer" id="timer">${timer}</div><button class="btn" id="btn">Подождите...</button></div>
 <video class="video" id="video" controls playsinline preload="metadata" src="${V}"></video>
 <div class="err" id="err">Видео не загрузилось. Проверь прямую ссылку на MP4.</div>
 </div>
-<div class="banner">
-<script async data-cfasync="false" src="https://pl30381760.effectivecpmnetwork.com/005a0b247c5edb84a57a6b92b4b26f1a/invoke.js"><\/script>
-<div id="container-005a0b247c5edb84a57a6b92b4b26f1a"></div>
-</div></div></div>
+<div class="banner" id="bannerBottom"></div>
+</div>
+</div>
+<div class="side" id="sideRight"></div>
+</div>
 <script>
 const open=document.getElementById('open'),preview=document.getElementById('preview'),gate=document.getElementById('gate'),wait=document.getElementById('wait'),timerEl=document.getElementById('timer'),video=document.getElementById('video'),err=document.getElementById('err');
-open.onclick=()=>{preview.style.display='none';gate.classList.add('active');let n=${timer};timerEl.textContent=n;const x=setInterval(()=>{n--;timerEl.textContent=n>0?n:'';if(n<=0){clearInterval(x);wait.style.display='none';video.style.display='block';video.load()}},1000)};
+const bannerTopSrcdoc=${JSON.stringify(bannerTopRaw)};
+const bannerBottomSrcdoc=${JSON.stringify(bannerBottomRaw)};
+const bannerSideSrcdoc=${JSON.stringify(bannerSideRaw)};
+
+function makeBanner(host,srcdoc,w,h){
+  const f=document.createElement('iframe');
+  f.sandbox='allow-scripts allow-same-origin';
+  f.style.cssText='border:0;width:'+w+'px;height:'+h+'px;max-width:100%';
+  f.srcdoc=srcdoc;
+  host.appendChild(f);
+}
+
+open.onclick=()=>{
+  preview.style.display='none';
+  gate.classList.add('active');
+
+  makeBanner(document.getElementById('bannerTop'),bannerTopSrcdoc,300,250);
+  makeBanner(document.getElementById('bannerBottom'),bannerBottomSrcdoc,300,100);
+
+  const sL=document.getElementById('sideLeft'),sR=document.getElementById('sideRight');
+  if(sL.offsetParent!==null) makeBanner(sL,bannerSideSrcdoc,160,600);
+  if(sR.offsetParent!==null) makeBanner(sR,bannerSideSrcdoc,160,600);
+
+  let n=${timer};timerEl.textContent=n;
+  const x=setInterval(()=>{n--;timerEl.textContent=n>0?n:'';if(n<=0){clearInterval(x);wait.style.display='none';video.style.display='block';video.load()}},1000)
+};
 video.onerror=()=>{err.style.display='block'};
 </script></body></html>`;
 
