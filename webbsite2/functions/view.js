@@ -1,27 +1,28 @@
 export async function onRequestGet(context) {
-  const { request } = context;
-  const url = new URL(request.url);
-  const q = url.searchParams;
 
-  const video = q.get("v") || "";
-  const thumb = q.get("i") || "";
-  const title = q.get("t") || "Видео";
-  const timer = Math.min(30, Math.max(3, Number(q.get("s") || 8)));
+const {request}=context;
+const url=new URL(request.url);
+const q=url.searchParams;
 
-  const esc = (s) =>
-    String(s).replace(/[&<>"']/g, c => ({
-      "&":"&amp;",
-      "<":"&lt;",
-      ">":"&gt;",
-      '"':"&quot;",
-      "'":"&#39;"
-    }[c]));
+const video=q.get("v")||"";
+const thumb=q.get("i")||"";
+const title=q.get("t")||"Видео";
+const timer=Math.min(30,Math.max(3,Number(q.get("s")||8)));
 
-  const V = esc(video);
-  const I = esc(thumb);
-  const T = esc(title);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#39;"
+}[c]));
 
-  const bannerTop = `
+const V=esc(video);
+const I=esc(thumb);
+const T=esc(title);
+
+
+const topBanner=`
 <script>
 atOptions={
 'key':'d23a1fd1e3611a7e483d6319d05ceda4',
@@ -29,12 +30,13 @@ atOptions={
 'height':250,
 'width':300,
 'params':{}
-}
-</script>
-<script src="https://www.highperformanceformat.com/d23a1fd1e3611a7e483d6319d05ceda4/invoke.js"></script>
+};
+<\/script>
+<script src="https://www.highperformanceformat.com/d23a1fd1e3611a7e483d6319d05ceda4/invoke.js"><\/script>
 `;
 
-  const bannerSide = `
+
+const sideBanner=`
 <script>
 atOptions={
 'key':'757bc3bbc1cd4205a78514cb1b4fa5e4',
@@ -42,23 +44,24 @@ atOptions={
 'height':600,
 'width':160,
 'params':{}
-}
-</script>
-<script src="https://www.highperformanceformat.com/757bc3bbc1cd4205a78514cb1b4fa5e4/invoke.js"></script>
+};
+<\/script>
+<script src="https://www.highperformanceformat.com/757bc3bbc1cd4205a78514cb1b4fa5e4/invoke.js"><\/script>
 `;
 
-  const html = `
-<!doctype html>
+
+const html=`<!doctype html>
 <html>
 <head>
 <meta charset="utf-8">
-<title>${T}</title>
 
 <style>
+
 body{
 background:#111;
 color:white;
 font-family:Arial;
+margin:0;
 display:flex;
 justify-content:center;
 padding:20px;
@@ -67,74 +70,91 @@ padding:20px;
 .wrap{
 display:flex;
 gap:20px;
+align-items:flex-start;
 }
 
-.side{
-display:block;
+.side iframe{
 width:160px;
 height:600px;
+border:0;
 }
 
-.card{
+.center{
 width:480px;
 }
 
-.thumb img{
+img{
 width:100%;
-border-radius:12px;
+border-radius:10px;
 cursor:pointer;
 }
 
-.gate{
+#gate{
 display:none;
 }
 
-.gate.active{
+#gate.active{
 display:block;
 }
 
-.banner{
-text-align:center;
-margin:10px;
+.top iframe{
+width:300px;
+height:250px;
+border:0;
 }
 
 video{
 width:100%;
 display:none;
 }
+
 </style>
 
 </head>
+
 
 <body>
 
 <div class="wrap">
 
-<div class="side" id="left"></div>
 
-<div class="card">
+<div class="side">
+<div id="left"></div>
+</div>
 
-<div id="preview" class="thumb">
+
+<div class="center">
+
+<div id="preview">
 <img src="${I}">
 </div>
 
-<div class="gate" id="gate">
 
-<div id="top" class="banner"></div>
+<div id="gate">
 
-<div id="timer">
-${timer}
+<div class="top">
+<div id="top"></div>
 </div>
+
+
+<h2 id="timer">${timer}</h2>
+
 
 <video id="video" controls src="${V}"></video>
 
-</div>
 
 </div>
 
-<div class="side" id="right"></div>
+</div>
+
+
+<div class="side">
+<div id="right"></div>
+</div>
+
 
 </div>
+
 
 
 <script>
@@ -143,30 +163,69 @@ const preview=document.getElementById("preview");
 const gate=document.getElementById("gate");
 const video=document.getElementById("video");
 
+
+function banner(el,code,w,h){
+
+let f=document.createElement("iframe");
+
+f.style.width=w+"px";
+f.style.height=h+"px";
+f.style.border="0";
+
+f.srcdoc=code;
+
+el.appendChild(f);
+
+}
+
+
+
 preview.onclick=()=>{
+
 
 preview.style.display="none";
 
 gate.classList.add("active");
 
-document.getElementById("top").innerHTML=${JSON.stringify(bannerTop)};
 
-document.getElementById("left").innerHTML=${JSON.stringify(bannerSide)};
+banner(
+document.getElementById("top"),
+${JSON.stringify(topBanner)},
+300,
+250
+);
 
-document.getElementById("right").innerHTML=${JSON.stringify(bannerSide)};
+
+banner(
+document.getElementById("left"),
+${JSON.stringify(sideBanner)},
+160,
+600
+);
+
+
+banner(
+document.getElementById("right"),
+${JSON.stringify(sideBanner)},
+160,
+600
+);
+
 
 
 let n=${timer};
 
-let t=setInterval(()=>{
+
+let x=setInterval(()=>{
 
 n--;
 
 document.getElementById("timer").innerHTML=n;
 
+
 if(n<=0){
 
-clearInterval(t);
+clearInterval(x);
 
 video.style.display="block";
 
@@ -175,13 +234,15 @@ video.style.display="block";
 },1000);
 
 
-}
+};
+
 
 </script>
 
+
 </body>
-</html>
-`;
+</html>`;
+
 
 return new Response(html,{
 headers:{
@@ -189,5 +250,6 @@ headers:{
 "cache-control":"no-cache"
 }
 });
+
 
 }
