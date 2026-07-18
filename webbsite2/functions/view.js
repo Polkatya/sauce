@@ -6,94 +6,188 @@ export async function onRequestGet(context) {
   const video = q.get("v") || "";
   const thumb = q.get("i") || "";
   const title = q.get("t") || "Видео";
-  const timer = Math.min(30, Math.max(3, parseInt(q.get("s") || "8", 10) || 8));
+  const timer = Math.min(30, Math.max(3, Number(q.get("s") || 8)));
 
-  const esc = (s) => String(s).replace(/[&<>"']/g, c => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-  }[c]));
+  const esc = (s) =>
+    String(s).replace(/[&<>"']/g, c => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#39;"
+    }[c]));
 
-  const V = esc(video), I = esc(thumb), T = esc(title);
+  const V = esc(video);
+  const I = esc(thumb);
+  const T = esc(title);
 
-  const bannerTopRaw = `<script>atOptions={'key':'d23a1fd1e3611a7e483d6319d05ceda4','format':'iframe','height':250,'width':300,'params':{}};<\/script><script src='https://www.highperformanceformat.com/d23a1fd1e3611a7e483d6319d05ceda4/invoke.js'><\/script>`;
-  const bannerBottomRaw = `<script async data-cfasync="false" src="https://pl30381760.effectivecpmnetwork.com/005a0b247c5edb84a57a6b92b4b26f1a/invoke.js"><\/script><div id="container-005a0b247c5edb84a57a6b92b4b26f1a"></div>`;
-  const bannerSideRaw = `<script>atOptions={'key':'757bc3bbc1cd4205a78514cb1b4fa5e4','format':'iframe','height':600,'width':160,'params':{}};<\/script><script src='https://www.highperformanceformat.com/757bc3bbc1cd4205a78514cb1b4fa5e4/invoke.js'><\/script>`;
+  const bannerTop = `
+<script>
+atOptions={
+'key':'d23a1fd1e3611a7e483d6319d05ceda4',
+'format':'iframe',
+'height':250,
+'width':300,
+'params':{}
+}
+</script>
+<script src="https://www.highperformanceformat.com/d23a1fd1e3611a7e483d6319d05ceda4/invoke.js"></script>
+`;
 
-  const html = `<!doctype html>
-<html lang="ru">
+  const bannerSide = `
+<script>
+atOptions={
+'key':'757bc3bbc1cd4205a78514cb1b4fa5e4',
+'format':'iframe',
+'height':600,
+'width':160,
+'params':{}
+}
+</script>
+<script src="https://www.highperformanceformat.com/757bc3bbc1cd4205a78514cb1b4fa5e4/invoke.js"></script>
+`;
+
+  const html = `
+<!doctype html>
+<html>
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${T}</title>
-<meta property="og:title" content="${T}">
-<meta property="og:description" content="Нажмите, чтобы посмотреть видео">
-<meta property="og:type" content="website">
-<meta property="og:image" content="${I}">
-<meta property="og:image:secure_url" content="${I}">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="${I}">
-<meta name="theme-color" content="#0f0f0f">
-<style>
-*{box-sizing:border-box;margin:0;padding:0}body{background:#0f0f0f;color:#f2f2f2;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
-.wrap{display:flex;align-items:flex-start;justify-content:center;gap:20px}
-.side{display:none;width:160px;height:600px;background:#181818;border-radius:8px;overflow:hidden;flex:0 0 160px}
-.card{width:100%;max-width:480px}.thumb{position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#1a1a1a;cursor:pointer}.thumb img{width:100%;height:100%;object-fit:cover;display:block}.play{position:absolute;inset:0;display:grid;place-items:center}.play span{width:64px;height:64px;border-radius:50%;background:#000a;display:grid;place-items:center;font-size:28px;padding-left:4px}.title{margin-top:12px;font-size:15px}.gate{display:none;background:#181818;border-radius:12px;overflow:hidden}.gate.active{display:block}.banner{background:#232323;min-height:60px;display:flex;align-items:center;justify-content:center;padding:10px}.body{padding:28px 20px;text-align:center}.timer{font-size:28px;margin-bottom:18px}.btn{width:100%;padding:13px;border:0;border-radius:8px;background:#2c2c2c;color:#777;font-size:15px}.video{display:none;width:100%;max-height:70vh;background:#000;border-radius:8px}.err{display:none;color:#ff8b8b;font-size:13px;margin-top:10px}
-@media (min-width:1000px){.side{display:block}}
-</style>
-</head>
-<body><div class="wrap">
-<div class="side" id="sideLeft"></div>
-<div class="card">
-<div id="preview"><div class="thumb" id="open"><img src="${I}" alt=""><div class="play"><span>▶</span></div></div><div class="title">${T}</div></div>
-<div class="gate" id="gate">
-<div class="banner" id="bannerTop"></div>
-<div class="body">
-<div id="wait"><div class="timer" id="timer">${timer}</div><button class="btn" id="btn">Подождите...</button></div>
-<video class="video" id="video" controls playsinline preload="metadata" src="${V}"></video>
-<div class="err" id="err">Видео не загрузилось. Проверь прямую ссылку на MP4.</div>
-</div>
-<div class="banner" id="bannerBottom"></div>
-</div>
-</div>
-<div class="side" id="sideRight"></div>
-</div>
-<script>
-const open=document.getElementById('open'),preview=document.getElementById('preview'),gate=document.getElementById('gate'),wait=document.getElementById('wait'),timerEl=document.getElementById('timer'),video=document.getElementById('video'),err=document.getElementById('err');
-const bannerTopSrcdoc=${JSON.stringify(bannerTopRaw)};
-const bannerBottomSrcdoc=${JSON.stringify(bannerBottomRaw)};
-const bannerSideSrcdoc=${JSON.stringify(bannerSideRaw)};
 
-function makeBanner(host,srcdoc,w,h){
-  const f=document.createElement('iframe');
-  f.sandbox='allow-scripts allow-same-origin';
-  f.style.cssText='border:0;width:'+w+'px;height:'+h+'px;max-width:100%';
-  f.srcdoc=srcdoc;
-  host.appendChild(f);
+<style>
+body{
+background:#111;
+color:white;
+font-family:Arial;
+display:flex;
+justify-content:center;
+padding:20px;
 }
 
-open.onclick=()=>{
-  preview.style.display='none';
-  gate.classList.add('active');
+.wrap{
+display:flex;
+gap:20px;
+}
 
-  makeBanner(document.getElementById('bannerTop'),bannerTopSrcdoc,300,250);
-  makeBanner(document.getElementById('bannerBottom'),bannerBottomSrcdoc,300,100);
+.side{
+display:block;
+width:160px;
+height:600px;
+}
 
-  const sL=document.getElementById('sideLeft'),sR=document.getElementById('sideRight');
-  if(sL.offsetParent!==null) makeBanner(sL,bannerSideSrcdoc,160,600);
-  if(sR.offsetParent!==null) makeBanner(sR,bannerSideSrcdoc,160,600);
+.card{
+width:480px;
+}
 
-  let n=${timer};timerEl.textContent=n;
-  const x=setInterval(()=>{n--;timerEl.textContent=n>0?n:'';if(n<=0){clearInterval(x);wait.style.display='none';video.style.display='block';video.load()}},1000)
-};
-video.onerror=()=>{err.style.display='block'};
-</script></body></html>`;
+.thumb img{
+width:100%;
+border-radius:12px;
+cursor:pointer;
+}
 
-  return new Response(html, {
-    status: 200,
-    headers: {
-      "content-type": "text/html; charset=utf-8",
-      "cache-control": "public, max-age=60"
-    }
-  });
+.gate{
+display:none;
+}
+
+.gate.active{
+display:block;
+}
+
+.banner{
+text-align:center;
+margin:10px;
+}
+
+video{
+width:100%;
+display:none;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="wrap">
+
+<div class="side" id="left"></div>
+
+<div class="card">
+
+<div id="preview" class="thumb">
+<img src="${I}">
+</div>
+
+<div class="gate" id="gate">
+
+<div id="top" class="banner"></div>
+
+<div id="timer">
+${timer}
+</div>
+
+<video id="video" controls src="${V}"></video>
+
+</div>
+
+</div>
+
+<div class="side" id="right"></div>
+
+</div>
+
+
+<script>
+
+const preview=document.getElementById("preview");
+const gate=document.getElementById("gate");
+const video=document.getElementById("video");
+
+preview.onclick=()=>{
+
+preview.style.display="none";
+
+gate.classList.add("active");
+
+document.getElementById("top").innerHTML=${JSON.stringify(bannerTop)};
+
+document.getElementById("left").innerHTML=${JSON.stringify(bannerSide)};
+
+document.getElementById("right").innerHTML=${JSON.stringify(bannerSide)};
+
+
+let n=${timer};
+
+let t=setInterval(()=>{
+
+n--;
+
+document.getElementById("timer").innerHTML=n;
+
+if(n<=0){
+
+clearInterval(t);
+
+video.style.display="block";
+
+}
+
+},1000);
+
+
+}
+
+</script>
+
+</body>
+</html>
+`;
+
+return new Response(html,{
+headers:{
+"content-type":"text/html;charset=utf-8",
+"cache-control":"no-cache"
+}
+});
+
 }
