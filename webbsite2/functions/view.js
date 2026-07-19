@@ -32,10 +32,7 @@ export async function onRequestGet(context) {
 <meta name="theme-color" content="#0f0f0f">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}body{background:#0f0f0f;color:#f2f2f2;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}.card{width:100%;max-width:480px}.thumb{position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#1a1a1a;cursor:pointer}.thumb img{width:100%;height:100%;object-fit:cover;display:block}.play{position:absolute;inset:0;display:grid;place-items:center}.play span{width:64px;height:64px;border-radius:50%;background:#000a;display:grid;place-items:center;font-size:28px;padding-left:4px}.title{margin-top:12px;font-size:15px}.gate{display:none;background:#181818;border-radius:12px;overflow:hidden}.gate.active{display:block}.banner{background:#232323;min-height:60px;display:flex;align-items:center;justify-content:center;padding:10px}.body{padding:28px 20px;text-align:center}.timer{font-size:28px;margin-bottom:18px}.btn{width:100%;padding:13px;border:0;border-radius:8px;background:#2c2c2c;color:#777;font-size:15px}.video{display:none;width:100%;max-height:70vh;background:#000;border-radius:8px}.err{display:none;color:#ff8b8b;font-size:13px;margin-top:10px}
-.side{display:none;position:fixed;top:50%;transform:translateY(-50%);width:160px;height:600px}
-.side-left{left:20px}
-.side-right{right:20px}
-@media (min-width:1100px){.side{display:block}}
+.side{display:none}
 </style>
 </head>
 <body><div class="card">
@@ -55,14 +52,7 @@ export async function onRequestGet(context) {
 <div id="container-005a0b247c5edb84a57a6b92b4b26f1a"></div>
 </div></div></div>
 
-<div class="side side-left">
-<script>atOptions={'key':'757bc3bbc1cd4205a78514cb1b4fa5e4','format':'iframe','height':600,'width':160,'params':{}};<\/script>
-<script src="https://www.highperformanceformat.com/757bc3bbc1cd4205a78514cb1b4fa5e4/invoke.js"><\/script>
-</div>
-<div class="side side-right">
-<script>atOptions={'key':'757bc3bbc1cd4205a78514cb1b4fa5e4','format':'iframe','height':600,'width':160,'params':{}};<\/script>
-<script src="https://www.highperformanceformat.com/757bc3bbc1cd4205a78514cb1b4fa5e4/invoke.js"><\/script>
-</div>
+<script src="https://pl30435907.effectivecpmnetwork.com/60/92/d9/6092d99937a7b46f899dce14317d6b3a.js"><\/script>
 
 <script>
 const open=document.getElementById('open'),preview=document.getElementById('preview'),gate=document.getElementById('gate'),wait=document.getElementById('wait'),timerEl=document.getElementById('timer'),video=document.getElementById('video'),err=document.getElementById('err');
